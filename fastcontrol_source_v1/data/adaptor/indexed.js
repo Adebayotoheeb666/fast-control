@@ -6,12 +6,15 @@ import { nanoid } from 'nanoid';
 import { SERVER_URL } from '../../config';
 import { uuid } from '../../components/formbuilder/UUID';
 
-export const db = new Dexie('graphDB');
+const isBrowser = typeof window !== 'undefined' && typeof indexedDB !== 'undefined';
+export const db = isBrowser ? new Dexie('graphDB') : null;
 
-db.version(4).stores({
-    graphs: 'id',
-    logs: '++id, graphId',
-});
+if (db) {
+    db.version(4).stores({
+        graphs: 'id',
+        logs: '++id, graphId',
+    });
+}
 
 // export const getAllGraphs = async () => await db.graphs.toArray();
 export const getAllGraphs = async () => {
@@ -176,9 +179,9 @@ export const addGraph = async (graph = {}, id = null) => {
     return graphId;
 };
 
-export const getLogs = async id => await db.logs.where('graphId').equals(id).desc().toArray();
+export const getLogs = async id => (db ? await db.logs.where('graphId').equals(id).desc().toArray() : []);
 
-export const delLogs = id => db.logs.delete(id);
+export const delLogs = id => (db ? db.logs.delete(id) : undefined);
 
 // Application
 export const getAllApplications = async () => {
