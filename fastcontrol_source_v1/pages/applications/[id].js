@@ -176,53 +176,56 @@ export default function Home() {
                 <meta name="description" content="Web Application design tool" />
                 <link rel="icon" href="/favicon.ico" />
             </Head>
-            <ContextMenu setShowModal={setShowModal}></ContextMenu>
-            <ApplicationNav
-                setShowModal={setShowModal}
-                setShowDrawer={setShowDrawer}
-                onClickSaveHandler={handleApplicationSave}
-            />
-            <ApplicationConfigDrawer
-                showDrawer={showDrawer}
-                onCloseDrawer={() => setShowDrawer('')}
-            />
-            <div className="app-content">
-                <div className="ac-sidenav-wrapper">
-                    <div className="acsw-content">
-                        {/* <ul>
-                            {sideNavLinks.map(snl => {
-                                return (
-                                    <li
-                                        onClick={() => {
-                                            handleSwitchPane(snl.id);
-                                        }}
-                                    >
-                                        {snl.label}
-                                    </li>
-                                );
-                            })}
-                        </ul> */}
-                        <Menu>
-                            {sideNavLinks.map((snl, ix) => {
-                                return (
-                                    <Menu.Item
-                                        key={ix}
-                                        onClick={e => {
-                                            handleSwitchPane(snl.id);
-                                        }}
-                                    >
-                                        <span>{snl.icon}</span>
-                                        {snl.label}
-                                    </Menu.Item>
-                                );
-                            })}
-                        </Menu>
+            <ContextMenu setShowModal={setShowModal}>
+                <div className="graph-content">
+                    <ApplicationNav
+                        setShowModal={setShowModal}
+                        setShowDrawer={setShowDrawer}
+                        onClickSaveHandler={handleApplicationSave}
+                    />
+                    <ApplicationConfigDrawer
+                        showDrawer={showDrawer}
+                        onCloseDrawer={() => setShowDrawer('')}
+                    />
+                    <div className="app-content">
+                        <div className="ac-sidenav-wrapper">
+                            <div className="acsw-content">
+                                {/* <ul>
+                                    {sideNavLinks.map(snl => {
+                                        return (
+                                            <li
+                                                onClick={() => {
+                                                    handleSwitchPane(snl.id);
+                                                }}
+                                            >
+                                                {snl.label}
+                                            </li>
+                                        );
+                                    })}
+                                </ul> */}
+                                <Menu>
+                                    {sideNavLinks.map((snl, ix) => {
+                                        return (
+                                            <Menu.Item
+                                                key={ix}
+                                                onClick={e => {
+                                                    handleSwitchPane(snl.id);
+                                                }}
+                                            >
+                                                <span>{snl.icon}</span>
+                                                {snl.label}
+                                            </Menu.Item>
+                                        );
+                                    })}
+                                </Menu>
+                            </div>
+                        </div>
+                        <div className="ac-window">
+                            <CurrentPane />
+                        </div>
                     </div>
                 </div>
-                <div className="ac-window">
-                    <CurrentPane />
-                </div>
-            </div>
+            </ContextMenu>
         </div>
     );
 }
