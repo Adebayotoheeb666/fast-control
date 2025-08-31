@@ -27,7 +27,7 @@ import store from '../../react-form-builder/src/stores/store';
 import { Notification } from '@arco-design/web-react';
 import { useApplicationsCtx } from '../../hooks/use-applications-ctx';
 import ApplicationConfigDrawer from '../../components/ApplicationConfigDrawer';
-import { SERVER_URL } from '../../config';
+import { SERVER_URL, USE_REMOTE_API } from '../../config';
 import { Button } from 'antd';
 import { Dropdown } from '@arco-design/web-react';
 import { ChangeFormInputFieldModal } from '../../components/modals/ChangeFormInputFieldModal';
@@ -266,8 +266,10 @@ export default function Home() {
                                 }
 
                                 const fetchTableRows = async () => {
+                                    if (!USE_REMOTE_API) {
+                                        return [];
+                                    }
                                     try {
-                                        const exportType = 'mysql';
                                         const sqlValue = `SELECT * from \`${related_table.name}\``;
                                         const response = await fetch(
                                             `${SERVER_URL}/backend/index.php/api/runQuery`,
@@ -279,27 +281,16 @@ export default function Home() {
                                                 body: JSON.stringify({
                                                     sqlValue: sqlValue,
                                                     connectConfig: applicationsCtx.connectionConfig,
-                                                }), // Replace with your desired data to send
+                                                }),
                                             }
                                         );
 
                                         const data = await response.json();
-
-                                        // await window.navigator.clipboard.writeText(sqlValue);
-                                        Notification.success({
-                                            title: '',
-                                            content: `Query execution summary: 
-                                            ${data['successCount']} queries executed successfully, ${data['failedCount']} queries failed.`,
-                                        });
-                                        return data?.executionResults.length > 0
+                                        return data?.executionResults?.length > 0
                                             ? data?.executionResults[0]?.result
-                                            : null;
+                                            : [];
                                     } catch (e) {
-                                        console.log(e);
-                                        Notification.error({
-                                            title: 'Database Error',
-                                        });
-                                        return null;
+                                        return [];
                                     }
                                 };
 
