@@ -2,7 +2,7 @@
 import Dexie from 'dexie';
 import { Notification } from '@arco-design/web-react';
 import { nanoid } from 'nanoid';
-import { SERVER_URL } from '../../config';
+import { SERVER_URL, USE_REMOTE_API } from '../../config';
 
 const isBrowser = typeof window !== 'undefined' && typeof indexedDB !== 'undefined';
 export const db = isBrowser ? new Dexie('graphDB') : null;
@@ -29,13 +29,12 @@ const safeJson = async res => {
 };
 
 const runRemote = async (fn, onErrorTitle) => {
+  if (!USE_REMOTE_API) {
+    return null;
+  }
   try {
     return await fn();
-  } catch (e) {
-    console.log(e);
-    if (onErrorTitle) {
-      Notification.error({ title: onErrorTitle });
-    }
+  } catch (_e) {
     return null;
   }
 };
