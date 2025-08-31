@@ -6,7 +6,7 @@ import ConfigDrawer from '../../components/config';
 import graphState from '../../hooks/use-graph-state';
 import FormNav from '../../components/form_nav';
 // import { ReactFormBuilder } from 'react-form-builder2';
-import 'react-form-builder2/dist/app.css';
+
 import { useRouter } from 'next/router';
 import dynamic from 'next/dynamic';
 import { IconLink, IconMoreVertical } from '@arco-design/web-react/icon';

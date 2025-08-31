@@ -8,7 +8,7 @@ import QueryNav from '../../components/query_nav';
 import { QueryBuilderAntD } from '@react-querybuilder/antd';
 import QueryBuilder from 'react-querybuilder';
 import { defaultValidator } from 'react-querybuilder';
-import 'react-querybuilder/dist/query-builder.css';
+
 import { useQueryBuilderCtx } from '../../hooks/use-query-builder-ctx';
 import { useRouter } from 'next/router';
 import { getApplication, getForm, getGraph, getQuery, saveForm, saveQuery } from '../../data/db';

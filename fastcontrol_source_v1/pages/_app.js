@@ -1,4 +1,6 @@
 import '@arco-design/web-react/dist/css/arco.css';
+import 'react-form-builder2/dist/app.css';
+import 'react-querybuilder/dist/query-builder.css';
 import '../styles/globals.sass';
 import GraphContainer from '../hooks/use-graph-state';
 import {

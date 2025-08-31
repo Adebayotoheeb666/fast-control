@@ -1,6 +1,5 @@
 import dynamic from 'next/dynamic';
 import { BASE_PATH, SERVER_URL, USE_REMOTE_API } from '../../../config';
-import 'react-form-builder2/dist/app.css';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
