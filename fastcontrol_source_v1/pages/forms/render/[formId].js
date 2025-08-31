@@ -1,5 +1,5 @@
 import dynamic from 'next/dynamic';
-import { BASE_PATH, SERVER_URL } from '../../../config';
+import { BASE_PATH, SERVER_URL, USE_REMOTE_API } from '../../../config';
 import 'react-form-builder2/dist/app.css';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
@@ -27,9 +27,11 @@ export default function FormRenderPage() {
             setFormConfig(prev => ({
                 ...prev,
                 task_data: targetForm?.task_data ?? [],
-                form_action_url: `${SERVER_URL}/backend/index.php/api/submitForm?formId=${formId}&tableName=${
-                    targetForm?.tableName ?? null
-                }&redirect=${BASE_PATH + router.asPath ?? ''}`,
+                form_action_url: USE_REMOTE_API
+                    ? `${SERVER_URL}/backend/index.php/api/submitForm?formId=${formId}&tableName=${
+                        targetForm?.tableName ?? null
+                    }&redirect=${BASE_PATH + router.asPath ?? ''}`
+                    : '' ,
             }));
         }
     }
@@ -65,46 +67,40 @@ export default function FormRenderPage() {
 }
 
 const getForm = async id => {
+    if (!USE_REMOTE_API) return null;
     try {
         const response = await fetch(`${SERVER_URL}/backend/index.php/api/getForm`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ id: id }), // Replace with your desired data to send
+            body: JSON.stringify({ id: id }),
         });
-
         const data = await response.json();
-
-        const { formJSON: form } = JSON.parse(data?.formData?.form);
-
+        const { formJSON: form } = JSON.parse(data?.formData?.form || '{}');
         return { ...form, id: data?.formData?.id ?? '_' };
     } catch (e) {
-        console.log(e);
         return null;
     }
 };
 
 const getApplication = async id => {
+    if (!USE_REMOTE_API) return null;
     try {
         const response = await fetch(`${SERVER_URL}/backend/index.php/api/getApplication`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ id: id }), // Replace with your desired data to send
+            body: JSON.stringify({ id: id }),
         });
-
         const data = await response.json();
-
         const app = {
-            ...JSON.parse(data?.applicationData?.application).appJSON,
+            ...JSON.parse(data?.applicationData?.application || '{}').appJSON,
             id: data?.applicationData?.id ?? '_',
         };
-        // console.log(app);
         return app;
     } catch (e) {
-        console.log(e);
         return null;
     }
 };

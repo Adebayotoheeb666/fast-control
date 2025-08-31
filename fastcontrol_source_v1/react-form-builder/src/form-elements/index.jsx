@@ -3,7 +3,7 @@ import { saveAs } from 'file-saver';
 import React from 'react';
 import Select from 'react-select';
 import SignaturePad from 'react-signature-canvas';
-import ReactBootstrapSlider from 'react-bootstrap-slider';
+// Replaced deprecated react-bootstrap-slider with native input[type="range"] compatible with React 18
 
 import StarRating from './star-rating';
 import DatePicker from './date-picker';
@@ -1034,7 +1034,18 @@ class Range extends React.Component {
                             <span className="float-left">{this.props.data.min_label}</span>
                             <span className="float-right">{this.props.data.max_label}</span>
                         </div>
-                        <ReactBootstrapSlider {...props} />
+                        <input
+                            type="range"
+                            min={props.min}
+                            max={props.max}
+                            step={props.step}
+                            value={props.value}
+                            list={props.list}
+                            onChange={props.change}
+                            ref={props.ref}
+                            disabled={props.disabled}
+                            className="form-control"
+                        />
                     </div>
                     <div className="visible_marks">{visible_marks}</div>
                     <input name={name} value={this.state.value} type="hidden" />

@@ -27,7 +27,7 @@ import store from '../../react-form-builder/src/stores/store';
 import { Notification } from '@arco-design/web-react';
 import { useApplicationsCtx } from '../../hooks/use-applications-ctx';
 import ApplicationConfigDrawer from '../../components/ApplicationConfigDrawer';
-import { SERVER_URL } from '../../config';
+import { SERVER_URL, USE_REMOTE_API } from '../../config';
 import { Button } from 'antd';
 import { Dropdown } from '@arco-design/web-react';
 import { ChangeFormInputFieldModal } from '../../components/modals/ChangeFormInputFieldModal';
@@ -266,8 +266,10 @@ export default function Home() {
                                 }
 
                                 const fetchTableRows = async () => {
+                                    if (!USE_REMOTE_API) {
+                                        return [];
+                                    }
                                     try {
-                                        const exportType = 'mysql';
                                         const sqlValue = `SELECT * from \`${related_table.name}\``;
                                         const response = await fetch(
                                             `${SERVER_URL}/backend/index.php/api/runQuery`,
@@ -279,27 +281,16 @@ export default function Home() {
                                                 body: JSON.stringify({
                                                     sqlValue: sqlValue,
                                                     connectConfig: applicationsCtx.connectionConfig,
-                                                }), // Replace with your desired data to send
+                                                }),
                                             }
                                         );
 
                                         const data = await response.json();
-
-                                        // await window.navigator.clipboard.writeText(sqlValue);
-                                        Notification.success({
-                                            title: '',
-                                            content: `Query execution summary: 
-                                            ${data['successCount']} queries executed successfully, ${data['failedCount']} queries failed.`,
-                                        });
-                                        return data?.executionResults.length > 0
+                                        return data?.executionResults?.length > 0
                                             ? data?.executionResults[0]?.result
-                                            : null;
+                                            : [];
                                     } catch (e) {
-                                        console.log(e);
-                                        Notification.error({
-                                            title: 'Database Error',
-                                        });
-                                        return null;
+                                        return [];
                                     }
                                 };
 
@@ -498,161 +489,164 @@ export default function Home() {
                     href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css"
                 ></link>
             </Head>
-            <ContextMenu setShowModal={setShowModal}></ContextMenu>
-            <FormNav
-                setShowModal={setShowModal}
-                setShowDrawer={setShowDrawer}
-                previewClickHandler={toggleFormPreview}
-                saveClickHandler={handleFormSave}
-            />
-            <ApplicationConfigDrawer
-                showDrawer={showDrawer}
-                onCloseDrawer={() => setShowDrawer('')}
-            />
-            <div className="app-content form-builder">
-                <div className="form-builder-utils">
-                    <div className="fbu-tables">
-                        <div className="fbu-tables-content">
-                            <span>Select Table</span>
-                            <select className="form-control" onChange={handleTableSwitch}>
-                                <option value={'_'}>-- Choose a table ---</option>
-                                {getAvailableTables().map((available_table, ix) => (
-                                    <option
-                                        key={available_table?.id ?? ix}
-                                        value={available_table.id ?? null}
-                                        selected={available_table?.id === selectedTable?.id}
-                                    >
-                                        {available_table.name ?? '_'}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                    </div>
-                    <div className="fbu-fields">
-                        <div className="fbu-fields-content">
-                            <span className="fbu-fields-title">Fields</span>
-                            {/* <ul>
-                                {fields.map(field_ => {
-                                    return (
-                                        <li>
-                                            {field_.label}{' '}
-                                            <span>{field_.isLinked ? <IconLink /> : <></>}</span>
-                                        </li>
-                                    );
-                                })}
-                            </ul> */}
-                            <Menu>
-                                {getSelectedTable()?.fields.length > 0 &&
-                                    getSelectedTable()?.fields?.map((field_, i) => {
-                                        return (
-                                            <Menu.Item key={i}>
-                                                {field_.name}{' '}
-                                                <span>
-                                                    <span
-                                                        className={`is-linked-${
-                                                            field_.isLinked?.status ?? false
-                                                        }`}
-                                                    >
-                                                        {field_?.isLinked?.status ? (
-                                                            <IconLink />
-                                                        ) : (
-                                                            <></>
-                                                        )}
-                                                    </span>
-                                                    {shouldRenderUtilOptionsButton(field_.type) ? (
-                                                        <Dropdown
-                                                            trigger={'click'}
-                                                            droplist={renderDropListByFieldType(
-                                                                field_.type,
-                                                                field_
+            <ContextMenu setShowModal={setShowModal}>
+                <div className="form-page-content">
+                    <FormNav
+                        setShowModal={setShowModal}
+                        setShowDrawer={setShowDrawer}
+                        previewClickHandler={toggleFormPreview}
+                        saveClickHandler={handleFormSave}
+                    />
+                    <ApplicationConfigDrawer
+                        showDrawer={showDrawer}
+                        onCloseDrawer={() => setShowDrawer('')}
+                    />
+                    <div className="app-content form-builder">
+                        <div className="form-builder-utils">
+                            <div className="fbu-tables">
+                                <div className="fbu-tables-content">
+                                    <span>Select Table</span>
+                                    <select className="form-control" onChange={handleTableSwitch}>
+                                        <option value={'_'}>-- Choose a table ---</option>
+                                        {getAvailableTables().map((available_table, ix) => (
+                                            <option
+                                                key={available_table?.id ?? ix}
+                                                value={available_table.id ?? null}
+                                                selected={available_table?.id === selectedTable?.id}
+                                            >
+                                                {available_table.name ?? '_'}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+                            <div className="fbu-fields">
+                                <div className="fbu-fields-content">
+                                    <span className="fbu-fields-title">Fields</span>
+                                    {/* <ul>
+                                        {fields.map(field_ => {
+                                            return (
+                                                <li>
+                                                    {field_.label}{' '}
+                                                    <span>{field_.isLinked ? <IconLink /> : <></>}</span>
+                                                </li>
+                                            );
+                                        })}
+                                    </ul> */}
+                                    <Menu>
+                                        {getSelectedTable()?.fields.length > 0 &&
+                                            getSelectedTable()?.fields?.map((field_, i) => {
+                                                return (
+                                                    <Menu.Item key={i}>
+                                                        {field_.name}{' '}
+                                                        <span>
+                                                            <span
+                                                                className={`is-linked-${
+                                                                    field_.isLinked?.status ?? false
+                                                                }`}
+                                                            >
+                                                                {field_?.isLinked?.status ? (
+                                                                    <IconLink />
+                                                                ) : (
+                                                                    <></>
+                                                                )}
+                                                            </span>
+                                                            {shouldRenderUtilOptionsButton(field_.type) ? (
+                                                                <Dropdown
+                                                                    trigger={'click'}
+                                                                    droplist={renderDropListByFieldType(
+                                                                        field_.type,
+                                                                        field_
+                                                                    )}
+                                                                >
+                                                                    <Button
+                                                                        className="arco-custom-btn-icon"
+                                                                        shape="round"
+                                                                        size="small"
+                                                                        type="text"
+                                                                        icon={<IconMoreVertical />}
+                                                                        style={{
+                                                                            padding: 0,
+                                                                            aspectRatio: 1,
+                                                                        }}
+                                                                        iconOnly={true}
+                                                                    />
+                                                                </Dropdown>
+                                                            ) : (
+                                                                <Button
+                                                                    type="text"
+                                                                    shape="round"
+                                                                    size="small"
+                                                                    style={{ visibility: 'hidden' }}
+                                                                ></Button>
                                                             )}
-                                                        >
-                                                            <Button
-                                                                className="arco-custom-btn-icon"
-                                                                shape="round"
-                                                                size="small"
-                                                                type="text"
-                                                                icon={<IconMoreVertical />}
-                                                                style={{
-                                                                    padding: 0,
-                                                                    aspectRatio: 1,
-                                                                }}
-                                                                iconOnly={true}
-                                                            />
-                                                        </Dropdown>
-                                                    ) : (
-                                                        <Button
-                                                            type="text"
-                                                            shape="round"
-                                                            size="small"
-                                                            style={{ visibility: 'hidden' }}
-                                                        ></Button>
-                                                    )}
-                                                </span>
-                                            </Menu.Item>
-                                        );
-                                    })}
-                            </Menu>
+                                                        </span>
+                                                    </Menu.Item>
+                                                );
+                                            })}
+                                    </Menu>
+                                </div>
+                            </div>
+                        </div>
+                        {/* <button onClick={testMutateFormData}>Test</button> */}
+                        <div className="ac-window acw-overflow">
+                            {tableId ? (
+                                typeof window !== 'undefined' && (
+                                    <ReactFormBuilder
+                                        className="form-builder-wrapper"
+                                        data={initialParsedFields}
+                                        initialData={initialParsedFields}
+                                        saveUrl={FORM_SAVE_URL}
+                                        toolbarItems={available_items_library}
+                                        renderEditForm={props => (
+                                            <CustomFormElementsEdit
+                                                selectedTable={getSelectedTable()}
+                                                onFieldLinkSelect={(selected_value, elm_id) => {
+                                                    if (elm_id) markFieldAsLinked(selected_value, elm_id);
+                                                    if (!selected_value) unlinkElement(elm_id);
+                                                }}
+                                                handleOptionLabelFieldChange={(fieldId, val) => {
+                                                    changeOptionsConfig(fieldId, { labelField: val });
+                                                }}
+                                                handleOptionValueFieldChange={(fieldId, val) => {
+                                                    changeOptionsConfig(fieldId, { valueField: val });
+                                                }}
+                                                // optionFieldValues={{
+                                                //     labelField: formBuilderCtx?.optionsConfig?.labelField,
+                                                //     valueField: formBuilderCtx?.optionsConfig?.valueField,
+                                                // }}
+                                                optionsConfig={formBuilderCtx.optionsConfig}
+                                                fieldRelationOptions={
+                                                    formBuilderCtx?.optionsConfig?.availableOptions
+                                                }
+                                                {...props}
+                                            />
+                                        )}
+                                    />
+                                )
+                            ) : (
+                                <h3>No Table Selected</h3>
+                            )}
+                            {/* <button>{uuid()}</button> */}
                         </div>
                     </div>
+                    <FormPreviewModal
+                        key={'jdfjfw'}
+                        formName={getFormName()}
+                        visible={formPreview.status}
+                        taskData={formPreview?.preview_data ?? []}
+                        onCancelHandler={toggleFormPreview}
+                        formId={formId}
+                        tableName={getSelectedTable()?.name}
+                    />
+                    <ChangeFormInputFieldModal
+                        key={'jfsidjfi'}
+                        visible={formInputChangeModal.isOpen}
+                        onCancelHandler={toggleFormInputChangeModal}
+                        field={formInputChangeModal.field}
+                    />
                 </div>
-                {/* <button onClick={testMutateFormData}>Test</button> */}
-                <div className="ac-window acw-overflow">
-                    {tableId ? (
-                        typeof window !== 'undefined' && (
-                            <ReactFormBuilder
-                                className="form-builder-wrapper"
-                                data={initialParsedFields}
-                                initialData={initialParsedFields}
-                                saveUrl={FORM_SAVE_URL}
-                                toolbarItems={available_items_library}
-                                renderEditForm={props => (
-                                    <CustomFormElementsEdit
-                                        selectedTable={getSelectedTable()}
-                                        onFieldLinkSelect={(selected_value, elm_id) => {
-                                            if (elm_id) markFieldAsLinked(selected_value, elm_id);
-                                            if (!selected_value) unlinkElement(elm_id);
-                                        }}
-                                        handleOptionLabelFieldChange={(fieldId, val) => {
-                                            changeOptionsConfig(fieldId, { labelField: val });
-                                        }}
-                                        handleOptionValueFieldChange={(fieldId, val) => {
-                                            changeOptionsConfig(fieldId, { valueField: val });
-                                        }}
-                                        // optionFieldValues={{
-                                        //     labelField: formBuilderCtx?.optionsConfig?.labelField,
-                                        //     valueField: formBuilderCtx?.optionsConfig?.valueField,
-                                        // }}
-                                        optionsConfig={formBuilderCtx.optionsConfig}
-                                        fieldRelationOptions={
-                                            formBuilderCtx?.optionsConfig?.availableOptions
-                                        }
-                                        {...props}
-                                    />
-                                )}
-                            />
-                        )
-                    ) : (
-                        <h3>No Table Selected</h3>
-                    )}
-                    {/* <button>{uuid()}</button> */}
-                </div>
-            </div>
-            <FormPreviewModal
-                key={'jdfjfw'}
-                formName={getFormName()}
-                visible={formPreview.status}
-                taskData={formPreview?.preview_data ?? []}
-                onCancelHandler={toggleFormPreview}
-                formId={formId}
-                tableName={getSelectedTable()?.name}
-            />
-            <ChangeFormInputFieldModal
-                key={'jfsidjfi'}
-                visible={formInputChangeModal.isOpen}
-                onCancelHandler={toggleFormInputChangeModal}
-                field={formInputChangeModal.field}
-            />
+            </ContextMenu>
         </div>
     );
 }

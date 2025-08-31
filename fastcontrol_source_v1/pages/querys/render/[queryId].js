@@ -1,5 +1,5 @@
 import Head from 'next/head';
-import { SERVER_URL } from '../../../config';
+import { SERVER_URL, USE_REMOTE_API } from '../../../config';
 import { runQuery } from '../../../data/adaptor/indexed';
 import { useEffect, useState } from 'react';
 import DataTable from 'react-data-table-component';
@@ -81,48 +81,40 @@ export default function QueryRenderPage() {
 }
 
 export const getQuery = async id => {
+    if (!USE_REMOTE_API) return null;
     try {
         const response = await fetch(`${SERVER_URL}/backend/index.php/api/getQuery`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ id: id }), // Replace with your desired data to send
+            body: JSON.stringify({ id: id }),
         });
-
         const data = await response.json();
-
-        const query = JSON.parse(data?.queryData?.query).queryJSON;
-
+        const query = JSON.parse(data?.queryData?.query || '{}').queryJSON;
         return { ...query, id: data?.queryData?.id ?? '_' };
     } catch (e) {
-        console.log(e);
-        Notification.error({
-            title: 'Server Connection Error',
-        });
+        return null;
     }
 };
 
 const getApplication = async id => {
+    if (!USE_REMOTE_API) return null;
     try {
         const response = await fetch(`${SERVER_URL}/backend/index.php/api/getApplication`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ id: id }), // Replace with your desired data to send
+            body: JSON.stringify({ id: id }),
         });
-
         const data = await response.json();
-
         const app = {
-            ...JSON.parse(data?.applicationData?.application).appJSON,
+            ...JSON.parse(data?.applicationData?.application || '{}').appJSON,
             id: data?.applicationData?.id ?? '_',
         };
-
         return app;
     } catch (e) {
-        console.log(e);
         return null;
     }
 };

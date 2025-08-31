@@ -310,106 +310,109 @@ export default function Home() {
                         href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css"
                     ></link>
                 </Head>
-                <ContextMenu setShowModal={setShowModal}></ContextMenu>
-                <QueryNav
-                    setShowModal={setShowModal}
-                    setShowDrawer={setShowDrawer}
-                    previewClickHandler={toggleQueryPreview}
-                    saveClickHandler={handleSaveQuery}
-                />
-                <ConfigDrawer showDrawer={showDrawer} onCloseDrawer={() => setShowDrawer('')} />
-                <PreviewQueryModal
-                    visible={queryPreview?.status ?? false}
-                    onCancelHandler={toggleQueryPreview}
-                    query={query}
-                />
-                <AddTableModal
-                    visible={addTablesModal.open}
-                    onCancelHandler={toggleAddTablesModal}
-                />
+                <ContextMenu setShowModal={setShowModal}>
+                    <div className="query-page-content">
+                        <QueryNav
+                            setShowModal={setShowModal}
+                            setShowDrawer={setShowDrawer}
+                            previewClickHandler={toggleQueryPreview}
+                            saveClickHandler={handleSaveQuery}
+                        />
+                        <ConfigDrawer showDrawer={showDrawer} onCloseDrawer={() => setShowDrawer('')} />
+                        <PreviewQueryModal
+                            visible={queryPreview?.status ?? false}
+                            onCancelHandler={toggleQueryPreview}
+                            query={query}
+                        />
+                        <AddTableModal
+                            visible={addTablesModal.open}
+                            onCancelHandler={toggleAddTablesModal}
+                        />
 
-                <div className="app-content form-builder">
-                    <div className="form-builder-utils">
-                        <div className="fbu-tables">
-                            <div
-                                className="fbu-tables-content"
-                                style={{ display: 'flex', flexDirection: 'column' }}
-                            >
-                                <span>Add a Table</span>
-                                {/* <select className="form-control" onChange={handleTableSwitch}>
-                                    <option value={'_'}>-- Choose a table ---</option>
-                                    {getAvailableTables().map((available_table, ix) => (
-                                        <option
-                                            key={available_table?.id ?? ix}
-                                            value={available_table.id ?? null}
-                                            selected={available_table?.id === selectedTable?.id}
-                                        >
-                                            {available_table.name ?? '_'}
-                                        </option>
-                                    ))}
-                                </select> */}
-                                <Button onClick={toggleAddTablesModal}>
-                                    {/* onClick, open a modal for adding the tables from a multiselect input listing all available tables */}
-                                    <IconPlus />
-                                </Button>
-                            </div>
-                        </div>
-                        <div className="fbu-tables">
-                            <div className="fbu-tables-content">
-                                <span>Tables</span>
-                                <Menu>
-                                    {getParsedSelectedTables().map((selected_table, ix) => (
-                                        <Menu.Item
-                                            key={ix}
-                                            style={{
-                                                display: 'flex',
-                                                justifyContent: 'space-between',
-                                            }}
-                                        >
-                                            {selected_table?.name}
-                                            <span>
-                                                <Button
-                                                    className="arco-custom-btn-icon"
-                                                    shape="round"
-                                                    size="small"
-                                                    type="text"
-                                                    icon={<IconDelete />}
+                        <div className="app-content form-builder">
+                            <div className="form-builder-utils">
+                                <div className="fbu-tables">
+                                    <div
+                                        className="fbu-tables-content"
+                                        style={{ display: 'flex', flexDirection: 'column' }}
+                                    >
+                                        <span>Add a Table</span>
+                                        {/* <select className="form-control" onChange={handleTableSwitch}>
+                                            <option value={'_'}>-- Choose a table ---</option>
+                                            {getAvailableTables().map((available_table, ix) => (
+                                                <option
+                                                    key={available_table?.id ?? ix}
+                                                    value={available_table.id ?? null}
+                                                    selected={available_table?.id === selectedTable?.id}
+                                                >
+                                                    {available_table.name ?? '_'}
+                                                </option>
+                                            ))}
+                                        </select> */}
+                                        <Button onClick={toggleAddTablesModal}>
+                                            {/* onClick, open a modal for adding the tables from a multiselect input listing all available tables */}
+                                            <IconPlus />
+                                        </Button>
+                                    </div>
+                                </div>
+                                <div className="fbu-tables">
+                                    <div className="fbu-tables-content">
+                                        <span>Tables</span>
+                                        <Menu>
+                                            {getParsedSelectedTables().map((selected_table, ix) => (
+                                                <Menu.Item
+                                                    key={ix}
                                                     style={{
-                                                        padding: 0,
-                                                        aspectRatio: 1,
-                                                        outline: 'none',
+                                                        display: 'flex',
+                                                        justifyContent: 'space-between',
                                                     }}
-                                                    iconOnly={true}
-                                                    onClick={() => {
-                                                        removeSelectedTable(selected_table?.id);
+                                                >
+                                                    {selected_table?.name}
+                                                    <span>
+                                                        <Button
+                                                            className="arco-custom-btn-icon"
+                                                            shape="round"
+                                                            size="small"
+                                                            type="text"
+                                                            icon={<IconDelete />}
+                                                            style={{
+                                                                padding: 0,
+                                                                aspectRatio: 1,
+                                                                outline: 'none',
+                                                            }}
+                                                            iconOnly={true}
+                                                            onClick={() => {
+                                                                removeSelectedTable(selected_table?.id);
 
-                                                        removeTableFromQuery(selected_table?.id);
-                                                    }}
-                                                />
-                                            </span>
-                                        </Menu.Item>
-                                    ))}
-                                </Menu>
+                                                                removeTableFromQuery(selected_table?.id);
+                                                            }}
+                                                        />
+                                                    </span>
+                                                </Menu.Item>
+                                            ))}
+                                        </Menu>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="ac-window acw-overflow acw-query-builder">
+                                {getParsedSelectedTables().length > 0 ? (
+                                    getParsedSelectedTables().map(table => (
+                                        <QueryBuilder
+                                            key={table?.id}
+                                            fields={table?.fields}
+                                            query={query[table?.id] ?? defaultInitialQuery}
+                                            onQueryChange={q => {
+                                                setQuery(prev => ({ ...prev, [table?.id]: q }));
+                                            }}
+                                        />
+                                    ))
+                                ) : (
+                                    <h3>No tables Selected</h3>
+                                )}
                             </div>
                         </div>
                     </div>
-                    <div className="ac-window acw-overflow acw-query-builder">
-                        {getParsedSelectedTables().length > 0 ? (
-                            getParsedSelectedTables().map(table => (
-                                <QueryBuilder
-                                    key={table?.id}
-                                    fields={table?.fields}
-                                    query={query[table?.id] ?? defaultInitialQuery}
-                                    onQueryChange={q => {
-                                        setQuery(prev => ({ ...prev, [table?.id]: q }));
-                                    }}
-                                />
-                            ))
-                        ) : (
-                            <h3>No tables Selected</h3>
-                        )}
-                    </div>
-                </div>
+                </ContextMenu>
             </div>
         </QueryBuilderAntD>
     );
